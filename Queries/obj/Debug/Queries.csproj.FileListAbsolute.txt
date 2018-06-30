@@ -25,3 +25,12 @@ C:\Projects\EntityFramework\Queries\Queries\obj\Debug\Queries.csproj.GenerateRes
 C:\Users\Sara\Downloads\Queries-20180630T212436Z-001\Queries\Queries\bin\Debug\Queries.exe.config
 C:\Users\Sara\Downloads\Queries-20180630T212436Z-001\Queries\Queries\obj\Debug\Queries.exe
 C:\Users\Sara\Downloads\Queries-20180630T212436Z-001\Queries\Queries\obj\Debug\Queries.pdb
+C:\Users\Sara\Downloads\Queries-20180630T212436Z-001\Queries\Queries\bin\Debug\Queries.exe
+C:\Users\Sara\Downloads\Queries-20180630T212436Z-001\Queries\Queries\bin\Debug\Queries.pdb
+C:\Users\Sara\Downloads\Queries-20180630T212436Z-001\Queries\Queries\bin\Debug\EntityFramework.dll
+C:\Users\Sara\Downloads\Queries-20180630T212436Z-001\Queries\Queries\bin\Debug\EntityFramework.SqlServer.dll
+C:\Users\Sara\Downloads\Queries-20180630T212436Z-001\Queries\Queries\bin\Debug\EntityFramework.xml
+C:\Users\Sara\Downloads\Queries-20180630T212436Z-001\Queries\Queries\bin\Debug\EntityFramework.SqlServer.xml
+C:\Users\Sara\Downloads\Queries-20180630T212436Z-001\Queries\Queries\obj\Debug\Queries.csprojResolveAssemblyReference.cache
+C:\Users\Sara\Downloads\Queries-20180630T212436Z-001\Queries\Queries\obj\Debug\Queries.Migrations.InitialMigration.resources
+C:\Users\Sara\Downloads\Queries-20180630T212436Z-001\Queries\Queries\obj\Debug\Queries.csproj.GenerateResource.Cache

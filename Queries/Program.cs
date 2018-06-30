@@ -8,28 +8,82 @@ namespace Queries
         static void Main(string[] args)
         {
             var context = new PlutoContext();
-            //Restriction
+            /***<<Restriction>>***/
             var query = from c in context.Courses
                         where c.Level == 1 && c.Author.Id == 1 //filtering and multi-condition
                         select c; //the last line should always be select
+            //Expression
+            var courses1 = context.Courses.Where(c => c.Level == 1);//delegate Func lambda expression
 
-            //Ording
+            /***Ording***/
             var query2 = from c in context.Courses
-		    where c.Author.Id == 1 
-		    orderby c.Level descending, c.Name //orderby multi-column
-		    select c; 
-            
-            //Projection
+                         where c.Author.Id == 1
+                         orderby c.Level descending, c.Name //orderby multi-column
+                         select c;
+            //Expression
+            var courses2 = context.Courses.Where(c => c.Level == 1)
+                .OrderBy(c => c.Name)
+                .ThenBy(c => c.Level);
+            //Descending
+            courses2 = context.Courses.Where(c => c.Level == 1)
+                .OrderByDescending(c => c.Name)
+                .ThenByDescending(c => c.Level);
+
+            /***Projection***/
             //project course class into different class that has a name and author
             var query3 = from c in context.Courses
-                        where c.Author.Id == 1 //filtering and multi-condition
-                        orderby c.Level descending, c.Name //order by multi-column| descending
-                        select new { Name = c.Name, Author = c.Author.Name }; //select new object <<projection>>
-            //Grouping
+                         where c.Author.Id == 1 //filtering and multi-condition
+                         orderby c.Level descending, c.Name //order by multi-column| descending
+                         select new { Name = c.Name, Author = c.Author.Name }; //select new object <<projection>>
+            //Expression
+            var courses3 = context.Courses.Where(c => c.Level == 1)
+               .OrderBy(c => c.Name)
+               .ThenBy(c => c.Level)
+               .Select(c => new { CoutseName = c.Name, AuthorName = c.Author.Name });//anonymous object
+
+            var listOfTags = context.Courses.Where(c => c.Level == 1)
+               .OrderBy(c => c.Name)
+               .ThenBy(c => c.Level)
+               .Select(c => c.Tags); //IQueryable -> IEnumerable like a list
+            //a list of lists of tags
+            //It's a hierarchical object
+            foreach (var c in listOfTags)
+            {
+                foreach (var tag in c)
+                {
+                    Console.WriteLine(tag.Name);
+                }
+            }
+
+            var tags = context.Courses.Where(c => c.Level == 1)
+               .OrderBy(c => c.Name)
+               .ThenBy(c => c.Level)
+               .SelectMany(c => c.Tags); //use select Many to flatten the list of lists
+            //return flat list of tags
+            foreach (var t in tags)
+            {
+                Console.WriteLine(t.Name);
+            }
+
+            /***Set Operators***/
+            //Expression
+            var tags2 = context.Courses.Where(c => c.Level == 1)
+               .OrderBy(c => c.Name)
+               .ThenBy(c => c.Level)
+               .SelectMany(c => c.Tags)
+               .Distinct();
+
+            //return distinct list of tags
+            foreach (var t in tags)
+            {
+                Console.WriteLine(t.Name);
+            }
+
+            /***Grouping***/
             var query4 = from c in context.Courses
-                        group c by c.Level
-                            into g // g is another variable
-                            select g;
+                         group c by c.Level
+                             into g // g is another variable
+                             select g;
             //what we get from the result now is a list of group
             foreach (var group in query4)
             {
@@ -44,9 +98,9 @@ namespace Queries
             }
             //grouping with aggregation
             var query5 = from c in context.Courses
-                        group c by c.Level
-                            into g // g is another variable
-                            select g;
+                         group c by c.Level
+                             into g // g is another variable
+                             select g;
             //what we get from the result now is a list of group
             foreach (var group in query5)
             {
@@ -54,38 +108,77 @@ namespace Queries
                 Console.WriteLine("{0}({1})", group.Key, group.Count());
             }
 
-            //joining
-            //inner join
+            //expression
+            var groups = context.Courses.GroupBy(c => c.Level);//key : level, break down by Level
+            foreach (var group in groups)
+            {
+                Console.WriteLine("Key: " + group.Key);
+                foreach (var course in group)
+                {
+                    Console.WriteLine("\t" + course.Name);
+                }
+            }
+
+            /***Joining***/
+            /***Inner join***/
             var query6 = from c in context.Courses
-				select new {CourseName = c.Name, AuthorName = c.Author.Name}; 
-				//projection | anonymous object
-				//c.Author <- navigation property
-				//no need for join because here we have navigation property
-				//LINQ provider and run time would auto translate this into an inner join in SQL
+                         select new { CourseName = c.Name, AuthorName = c.Author.Name };
+            //projection | anonymous object
+            //c.Author <- navigation property
+            //no need for join because here we have navigation property
+            //LINQ provider and run time would auto translate this into an inner join in SQL
 
             var query7 = from c in context.Courses
-				join a in context.Authors on c.AuthorId equals a.Id //inner join
-				select new {CourseName = c.Name, AuthorName = a.Name};
+                         join a in context.Authors on c.AuthorId equals a.Id //inner join
+                         select new { CourseName = c.Name, AuthorName = a.Name };
 
-            //Group Join
+            //Expression
+            var courses7 = context.Courses.Join(context.Authors,
+                c => c.AuthorId,
+                a => a.Id,
+                (course, author) => new
+                    {
+                        CourseName = course.Name,
+                        AuthorName = author.Name
+                    });
+
+            /***Group Join***/
             var query8 = from a in context.Authors
-				join c in context.Courses on a.Id equals c.AuthorId // <- inner join
-				into g //<- this become a group join
-				select new {AuthorName = a.Name, Courses = g.Count()};
-				//matching left side a to one or more on right side c
-	        foreach(var c in query8)
-	        {
-		        Console.WriteLine("{0} ({1})", c.AuthorName, c.Courses);
-	        }	
-		
-            //Cross Join
+                         join c in context.Courses on a.Id equals c.AuthorId // <- inner join
+                         into g //<- this become a group join
+                         select new { AuthorName = a.Name, Courses = g.Count() };
+            //matching left side a to one or more on right side c
+            foreach (var c in query8)
+            {
+                Console.WriteLine("{0} ({1})", c.AuthorName, c.Courses);
+            }
+
+            //Expression
+            var courses8 = context.Authors.GroupJoin(context.Courses,
+                a => a.Id,
+                c => c.AuthorId,
+                (author, courses) => new
+                {
+                    Author = author,
+                    Courses = courses.Count()
+                });
+
+            /***Cross Join***/
             var query9 = from a in context.Authors
-				from c in context.Courses //<-cross join
-				select new {AuthorName = a.Name, CourseName = c.Name};
-	        foreach(var x in query9)
-	        {
+                         from c in context.Courses //<-cross join
+                         select new { AuthorName = a.Name, CourseName = c.Name };
+            foreach (var x in query9)
+            {
                 Console.WriteLine("{0} ({1})", x.AuthorName, x.CourseName);
-	        }		
+            }
+
+            //Expression
+            var courses9 = context.Authors.SelectMany(a => context.Courses,
+                (author, course) => new
+                {
+                    AuthorName = author.Name,
+                    CourseName = course.Name
+                });
         }
     }
 }
