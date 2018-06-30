@@ -12,7 +12,7 @@ namespace Queries
             var query = from c in context.Courses
                         where c.Level == 1 && c.Author.Id == 1 //filtering and multi-condition
                         select c; //the last line should always be select
-            //Expression
+            //Extension
             var courses1 = context.Courses.Where(c => c.Level == 1);//delegate Func lambda expression
 
             /***Ording***/
@@ -20,7 +20,7 @@ namespace Queries
                          where c.Author.Id == 1
                          orderby c.Level descending, c.Name //orderby multi-column
                          select c;
-            //Expression
+            //Extension
             var courses2 = context.Courses.Where(c => c.Level == 1)
                 .OrderBy(c => c.Name)
                 .ThenBy(c => c.Level);
@@ -35,7 +35,7 @@ namespace Queries
                          where c.Author.Id == 1 //filtering and multi-condition
                          orderby c.Level descending, c.Name //order by multi-column| descending
                          select new { Name = c.Name, Author = c.Author.Name }; //select new object <<projection>>
-            //Expression
+            //Extension
             var courses3 = context.Courses.Where(c => c.Level == 1)
                .OrderBy(c => c.Name)
                .ThenBy(c => c.Level)
@@ -66,7 +66,7 @@ namespace Queries
             }
 
             /***Set Operators***/
-            //Expression
+            //Extension
             var tags2 = context.Courses.Where(c => c.Level == 1)
                .OrderBy(c => c.Name)
                .ThenBy(c => c.Level)
@@ -108,7 +108,7 @@ namespace Queries
                 Console.WriteLine("{0}({1})", group.Key, group.Count());
             }
 
-            //expression
+            //Extension
             var groups = context.Courses.GroupBy(c => c.Level);//key : level, break down by Level
             foreach (var group in groups)
             {
@@ -132,7 +132,7 @@ namespace Queries
                          join a in context.Authors on c.AuthorId equals a.Id //inner join
                          select new { CourseName = c.Name, AuthorName = a.Name };
 
-            //Expression
+            //Extension
             var courses7 = context.Courses.Join(context.Authors,
                 c => c.AuthorId,
                 a => a.Id,
@@ -153,7 +153,7 @@ namespace Queries
                 Console.WriteLine("{0} ({1})", c.AuthorName, c.Courses);
             }
 
-            //Expression
+            //Extension
             var courses8 = context.Authors.GroupJoin(context.Courses,
                 a => a.Id,
                 c => c.AuthorId,
@@ -172,13 +172,43 @@ namespace Queries
                 Console.WriteLine("{0} ({1})", x.AuthorName, x.CourseName);
             }
 
-            //Expression
+            //Extension
             var courses9 = context.Authors.SelectMany(a => context.Courses,
                 (author, course) => new
                 {
                     AuthorName = author.Name,
                     CourseName = course.Name
                 });
+
+            /***Partitioning***/
+            //usesful when you want to return a page of records
+            //imagine you want to display courses in pages and the size of each page i 10
+            //get courses in 2nd page
+            var secondPage = context.Courses.Skip(10).Take(10);
+
+            /***Element Operators***/
+            //only want single object or first object in the list
+            var firstObject = context.Courses.OrderBy(x => x.Level).First();
+            firstObject = context.Courses.OrderBy(x => x.Level).FirstOrDefault();//in case there's no record in source
+            firstObject = context.Courses.OrderBy(x => x.Level).FirstOrDefault(c => c.FullPrice > 100);
+            var lastObject = context.Courses.OrderBy(x => x.Level).Last();
+            //last cannot be applied when you are working with a database like sql server
+            //linq can be use with different data source like sql server onkects and memory and so on
+            //not all of them can be transfer into SQL
+            //if you want last record with sql server then orderby desc way and select the first one
+            var singleObject = context.Courses.Single(c => c.Id == 1); 
+            singleObject = context.Courses.SingleOrDefault (c => c.Id == 1);
+           
+            /***Quantifying***/
+            var allCourses = context.Courses.All(x => x.FullPrice > 10);
+            bool anyCourses = context.Courses.Any(x => x.Level == 1);
+
+            /***Aggregating***/
+            var count = context.Courses.Count();
+            var maxPrice = context.Courses.Max(c => c.FullPrice);
+            var minPrice = context.Courses.Min(c => c.FullPrice);
+            var avgPrice = context.Courses.Average(c => c.FullPrice);
+
         }
     }
 }
